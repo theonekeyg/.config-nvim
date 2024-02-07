@@ -1,48 +1,5 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-
-Kickstart.nvim is *not* a distribution.
-
-Kickstart.nvim is a template for your own configuration.
-  The goal is that you can read every line of code, top-to-bottom, understand
-  what your configuration is doing, and modify it to suit your needs.
-
-  Once you've done that, you should start exploring, configuring and tinkering to
-  explore Neovim!
-
-  If you don't know anything about Lua, I recommend taking some time to read through
-  a guide. One possible example:
-  - https://learnxinyminutes.com/docs/lua/
-
-
-  And then you can explore or search through `:help lua-guide`
-  - https://neovim.io/doc/user/lua-guide.html
-
-
-Kickstart Guide:
-
-I have left several `:help X` comments throughout the init.lua
-You should run that command and read that help section for more information.
-
-In addition, I have some `NOTE:` items throughout the file.
-These are for you, the reader to help understand what is happening. Feel free to delete
-them once you know what you're doing, but they should serve as a guide for when you
-are first encountering a few different constructs in your nvim config.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now :)
---]]
-
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+vim.g.mapleader = ','
+vim.g.maplocalleader = ','
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -76,6 +33,9 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
+  -- VIM Surrounding keymaps
+  'tpope/vim-surround',
+
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -95,6 +55,25 @@ require('lazy').setup({
     },
   },
 
+  -- Copilot config
+  {
+    'zbirenbaum/copilot.lua',
+    cmd = "Copilot",
+    -- event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggestion = {
+          enabled = false,
+          auto_trigger = true
+        },
+        panel = {
+          enabled = false,
+        },
+      })
+    end,
+  },
+
+
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -109,7 +88,16 @@ require('lazy').setup({
 
       -- Adds a number of user-friendly snippets
       'rafamadriz/friendly-snippets',
+
+      'zbirenbaum/copilot-cmp',
     },
+  },
+
+  {
+    "zbirenbaum/copilot-cmp",
+    config = function ()
+      require("copilot_cmp").setup()
+    end
   },
 
   -- Useful plugin to show you pending keybinds.
@@ -214,6 +202,15 @@ require('lazy').setup({
         component_separators = '|',
         section_separators = '',
       },
+      sections = {
+        lualine_z = {
+          'location',
+          function()
+            local strToShow = vim.fn.line('$')
+            return strToShow
+          end
+        },
+      },
     },
   },
 
@@ -250,6 +247,32 @@ require('lazy').setup({
     },
   },
 
+  -- File explorer tree
+  {
+    "nvim-tree/nvim-tree.lua",
+    version = "*",
+    lazy = false,
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+    },
+    config = function()
+      require("nvim-tree").setup({
+        sort = {
+          sorter = "case_sensitive",
+        },
+        view = {
+          width = 30,
+        },
+        renderer = {
+          group_empty = true,
+        },
+        filters = {
+          dotfiles = true,
+        },
+      })
+    end,
+  },
+
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -279,10 +302,11 @@ require('lazy').setup({
 -- NOTE: You can change these options as you wish!
 
 -- Set highlight on search
-vim.o.hlsearch = false
+vim.o.hlsearch = true
 
--- Make line numbers default
+-- Make line numbers default & enable relative numbers
 vim.wo.number = true
+vim.wo.relativenumber = true
 
 -- Enable mouse mode
 vim.o.mouse = 'a'
@@ -315,6 +339,9 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+-- Set identation options
+vim.o.tabstop = 4
+
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
@@ -330,6 +357,26 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+
+-- Quick way to switch between open windows
+vim.keymap.set('n', '<C-J>', '<C-W>j', { desc = "Change active window down from current active window" })
+vim.keymap.set('n', '<C-K>', '<C-W>k', { desc = "Change active window up from current active window" })
+vim.keymap.set('n', '<C-H>', '<C-W>h', { desc = "Change active window left from current active window" })
+vim.keymap.set('n', '<C-L>', '<C-W>l', { desc = "Change active window right from current active window" })
+
+-- vim.keymap.set('n', '<leader>f', '<CMD>NvimTreeOpen<CR>', { desc = "Open file explorer tree" })
+vim.keymap.set('n', '<leader>f', '<CMD>NvimTreeFindFileToggle<CR>', { desc = "Open file explorer tree" })
+vim.keymap.set('n', '<leader>cp', '<CMD>echo expand("%")<CR>', { desc = "Print path to the current buffer" })
+vim.keymap.set('n', '<leader>w', vim.cmd.write, { desc = "Quick way to write file"})
+
+vim.keymap.set('n', '<leader>o', 'o<Esc>', { desc = "Create empty line on the next line" })
+vim.keymap.set('n', '<leader>O', 'O<Esc>', { desc = "Create empty line on the current line" })
+
+
+-- inoremap <C-V> <Esc>"+pa
+-- " Enable pasting from global clipboard
+-- " with CTRL+V in Insert mode
+vim.keymap.set('i', '<C-V>', '<Esc>"+pa', { desc = "Paste \"+ buffer"})
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -396,7 +443,7 @@ vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
+vim.keymap.set('n', '<F2>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -663,6 +710,7 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
+    { name = 'copilot' },
     { name = 'path' },
   },
 }

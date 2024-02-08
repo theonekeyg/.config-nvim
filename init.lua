@@ -36,6 +36,11 @@ require('lazy').setup({
   -- VIM Surrounding keymaps
   'tpope/vim-surround',
 
+  -- Replace text with the contents of a register
+  'vim-scripts/ReplaceWithRegister',
+
+  'williamboman/mason.nvim',
+
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -52,7 +57,15 @@ require('lazy').setup({
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
+
     },
+  },
+
+  -- DAP (Debug Adapter Protocol)
+  {
+    'mfussenegger/nvim-dap',
+    'jay-babu/mason-nvim-dap.nvim',
+    'rcarriga/nvim-dap-ui'
   },
 
   -- Copilot config
@@ -93,13 +106,13 @@ require('lazy').setup({
     },
   },
 
-  {
-    "zbirenbaum/copilot-cmp",
-    config = function ()
-      require("copilot_cmp").setup()
-    end
-  },
-
+  -- {
+  --   "zbirenbaum/copilot-cmp",
+  --   config = function ()
+  --     require("copilot_cmp").setup()
+  --   end
+  -- },
+  --
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
   {
@@ -247,8 +260,8 @@ require('lazy').setup({
     },
   },
 
-  -- File explorer tree
   {
+    -- File explorer tree
     "nvim-tree/nvim-tree.lua",
     version = "*",
     lazy = false,
@@ -572,7 +585,7 @@ local on_attach = function(_, bufnr)
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  -- nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -610,6 +623,30 @@ require('which-key').register({
 -- before setting up the servers.
 require('mason').setup()
 require('mason-lspconfig').setup()
+require("mason-nvim-dap").setup({
+  ensure_installed = { "python", "delve" },
+  automatic_installation = true,
+  handlers = {
+    function(config)
+      -- all sources with no handler get passed here
+      print('mason')
+
+      -- Keep original functionality
+      require('mason-nvim-dap').default_setup(config)
+    end,
+    python = function(config)
+      config.adapters = {
+        type = "executable",
+        command = "/usr/bin/python3",
+        args = {
+          "-m",
+          "debugpy.adapter",
+        },
+      }
+      require('mason-nvim-dap').default_setup(config) -- don't forget this!
+    end,
+  },
+})
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -668,6 +705,8 @@ local cmp = require 'cmp'
 local luasnip = require 'luasnip'
 require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
+require("copilot").setup()
+require("copilot_cmp").setup()
 
 cmp.setup {
   snippet = {

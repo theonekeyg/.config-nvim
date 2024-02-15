@@ -279,9 +279,6 @@ require('lazy').setup({
         renderer = {
           group_empty = true,
         },
-        filters = {
-          dotfiles = true,
-        },
       })
     end,
   },
@@ -746,12 +743,12 @@ cmp.setup {
       end
     end, { 'i', 's' }),
   },
-  sources = {
+  sources = cmp.config.sources({
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'copilot' },
     { name = 'path' },
-  },
+  }),
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`

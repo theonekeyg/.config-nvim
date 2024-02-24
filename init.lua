@@ -72,21 +72,28 @@ require('lazy').setup({
   {
     'zbirenbaum/copilot.lua',
     cmd = "Copilot",
-    -- event = "InsertEnter",
+    event = "InsertEnter",
     config = function()
       require("copilot").setup({
         suggestion = {
-          enabled = false,
-          auto_trigger = true
+          enabled = true,
+          auto_trigger = true,
+          -- keymap = {
+          --   accept = "<C-L>"
+          -- }
         },
         panel = {
-          enabled = false,
+          enabled = true,
         },
+        -- keymap = {
+        --   accept = "<CR>"
+        -- }
       })
+      require("copilot.suggestion").toggle_auto_trigger()
     end,
   },
 
-
+  --[[
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -105,6 +112,7 @@ require('lazy').setup({
       'zbirenbaum/copilot-cmp',
     },
   },
+  --]]
 
   -- {
   --   "zbirenbaum/copilot-cmp",
@@ -381,7 +389,6 @@ vim.keymap.set('n', '<leader>w', vim.cmd.write, { desc = "Quick way to write fil
 
 vim.keymap.set('n', '<leader>o', 'o<Esc>', { desc = "Create empty line on the next line" })
 vim.keymap.set('n', '<leader>O', 'O<Esc>', { desc = "Create empty line on the current line" })
-
 
 -- inoremap <C-V> <Esc>"+pa
 -- " Enable pasting from global clipboard
@@ -676,7 +683,7 @@ require('neodev').setup()
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+-- capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
@@ -696,13 +703,14 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
+require("copilot").setup()
 -- [[ Configure nvim-cmp ]]
+--[[
 -- See `:help cmp`
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
 require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
-require("copilot").setup()
 require("copilot_cmp").setup()
 
 cmp.setup {
@@ -750,6 +758,7 @@ cmp.setup {
     { name = 'path' },
   }),
 }
+--]]
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

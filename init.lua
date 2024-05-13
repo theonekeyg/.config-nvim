@@ -319,6 +319,9 @@ require('lazy').setup({
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 
+-- Turn off swap file usage
+vim.opt.swapfile = false
+
 -- Set highlight on search
 vim.o.hlsearch = true
 

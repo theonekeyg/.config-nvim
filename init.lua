@@ -419,6 +419,9 @@ require('telescope').setup {
         ['<C-d>'] = false,
       },
     },
+    file_ignore_patters = {
+      "node_modules"
+    }
   },
 }
 

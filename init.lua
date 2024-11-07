@@ -362,6 +362,7 @@ vim.o.termguicolors = true
 
 -- Set identation options
 vim.o.tabstop = 4
+vim.o.shiftwidth = 4
 
 -- [[ Basic Keymaps ]]
 
@@ -767,6 +768,21 @@ cmp.setup {
   }),
 }
 --]]
+--
+-- " Quickly copy <file>:<line_num> into clipboard register
+-- function! GDBFileInfo()
+--   let gdb_file_info = expand("%") . ":" . line(".")
+--   let @+=gdb_file_info
+--   echo gdb_file_info
+-- endfunction
+-- map <leader>b :call GDBFileInfo()<CR>
+local function copy_gdb_file_info()
+  local gdb_file_info = vim.fn.expand('%') .. ':' .. vim.fn.line('.')
+  vim.fn.setreg('+', gdb_file_info)
+  print(gdb_file_info)
+end
+
+vim.keymap.set('n', '<leader>b', copy_gdb_file_info, { desc = 'Copy <file>:<line_num> into clipboard register' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

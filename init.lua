@@ -18,7 +18,7 @@ vim.opt.rtp:prepend(lazypath)
 -- Make sure to setup `mapleader` and `maplocalleader` before
 -- loading lazy.nvim so that mappings are correct.
 -- This is also a good place to setup other settings (vim.opt)
-vim.g.mapleader = " "
+vim.g.mapleader = ","
 vim.g.maplocalleader = "\\"
 
 -- [[ Configure plugins ]]
@@ -126,7 +126,13 @@ require('lazy').setup({
   -- },
   --
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  {
+    'folke/which-key.nvim', opts = {
+      on_attach = function()
+        require("which-key.health").check()
+      end,
+    }
+  },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
